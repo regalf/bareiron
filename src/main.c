@@ -508,6 +508,8 @@ int main () {
     // Ignore SIGPIPE so send() returns EPIPE instead of crashing
     // (BSD systems lack MSG_NOSIGNAL, and this is portable to all POSIX)
     signal(SIGPIPE, SIG_IGN);
+    // Disable stdout buffering so startup messages appear immediately
+    setbuf(stdout, NULL);
   #endif
 
   // Hash the seeds to ensure they're random enough

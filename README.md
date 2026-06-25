@@ -38,6 +38,8 @@ Before compiling, you'll need to dump registry data from a vanilla Minecraft ser
   ```
   The required sysroot can be obtained by extracting OpenBSD/macppc `baseXX.tgz` and `compXX.tgz` from any [OpenBSD mirror](https://cdn.openbsd.org/pub/OpenBSD/).
 
+  > **Troubleshooting on OpenBSD**: If the server starts but clients cannot connect, ensure OpenBSD's `pf` firewall allows incoming traffic on the configured port (default `25565`). Add a pass rule to `/etc/pf.conf`, for example: `pass in proto tcp to port 25565`, then reload with `pfctl -f /etc/pf.conf`. You may also need to check `sockstat` to confirm the server is listening.
+
 ## Configuration
 Configuring the server requires compiling it from its source code as described in the section above.
 
