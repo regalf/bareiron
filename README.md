@@ -27,7 +27,12 @@ Before compiling, you'll need to dump registry data from a vanilla Minecraft ser
   - To compile a MSYS2-linked binary: install [MSYS2](https://www.msys2.org/), and open the "MSYS2 MSYS" shell. From there, install `gcc` (run `pacman -Sy gcc`), navigate to this project's directory and run `./build.sh`. 
   - To compile and run a Linux binary from Windows: install WSL, and from there install `gcc` and run `./build.sh` in this project's directory.
 - To target an ESP variant, set up a PlatformIO project (select the ESP-IDF framework, **not Arduino**) and clone this repository on top of it. See **Configuration** below for further steps. For better performance, consider changing the clock speed and enabling compiler optimizations. If you don't know how to do this, there are plenty of resources online.
-- For **cross-compilation to OpenBSD/macppc** (or any target), the build script respects `CC`, `CFLAGS`, and `LDFLAGS` environment variables. Example:
+- For **cross-compilation to OpenBSD/macppc** (or any target), use the automated script:
+  ```bash
+  # Automated: downloads sysroot + generates registries + compiles
+  ./cross-build.sh
+  ```
+  Or manually via `build.sh` with environment variables:
   ```bash
   SYSROOT=/path/to/openbsd-macppc-sysroot
   CC="clang --target=powerpc-unknown-openbsd --sysroot=$SYSROOT -B$SYSROOT/usr/lib" \
@@ -38,7 +43,7 @@ Before compiling, you'll need to dump registry data from a vanilla Minecraft ser
   ```
   The required sysroot can be obtained by extracting OpenBSD/macppc `baseXX.tgz` and `compXX.tgz` from any [OpenBSD mirror](https://cdn.openbsd.org/pub/OpenBSD/).
 
-  > **Troubleshooting on OpenBSD**: If the server starts but clients cannot connect, ensure OpenBSD's `pf` firewall allows incoming traffic on the configured port (default `25565`). Add a pass rule to `/etc/pf.conf`, for example: `pass in proto tcp to port 25565`, then reload with `pfctl -f /etc/pf.conf`. You may also need to check `sockstat` to confirm the server is listening.
+  > **Troubleshooting on OpenBSD**: If the server starts but clients cannot connect, ensure OpenBSD's `pf` firewall allows incoming traffic on the configured port (default `25565`). Add a pass rule to `/etc/pf.conf`, for example: `pass in proto tcp to port 25565`, then reload with `pfctl -f /etc/pf.conf`. Confirm the server is listening with `netstat -an -f inet | grep 25565`.
 
 ## Configuration
 Configuring the server requires compiling it from its source code as described in the section above.
