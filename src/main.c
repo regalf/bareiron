@@ -3,6 +3,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <signal.h>
 
 #ifndef CLOCK_REALTIME
 #define CLOCK_REALTIME 0
@@ -503,6 +504,10 @@ int main () {
         fprintf(stderr, "WSAStartup failed\n");
         exit(EXIT_FAILURE);
       }
+  #else
+    // Ignore SIGPIPE so send() returns EPIPE instead of crashing
+    // (BSD systems lack MSG_NOSIGNAL, and this is portable to all POSIX)
+    signal(SIGPIPE, SIG_IGN);
   #endif
 
   // Hash the seeds to ensure they're random enough

@@ -12,6 +12,9 @@ The goal of this project is to enable hosting Minecraft servers on very weak dev
 ## Quick start
 For PC x86_64 platforms, grab the [latest build binary](https://github.com/p2r3/bareiron/releases/download/latest/bareiron.exe) and run it. The file is a [Cosmopolitan polyglot](https://github.com/jart/cosmopolitan), which means it'll run on Windows, Linux, and possibly Mac, despite the file extension. Note that the server's default settings cannot be reconfigured without compiling from source.
 
+### OpenBSD/macppc port
+This fork adds **OpenBSD/macppc** (PowerPC 32-bit) support. Cross-compilation from Linux works with Clang targeting `powerpc-unknown-openbsd`. See **Cross-compilation** below.
+
 For microcontrollers, see the section on **compilation** below.
 
 ## Compilation
@@ -24,6 +27,16 @@ Before compiling, you'll need to dump registry data from a vanilla Minecraft ser
   - To compile a MSYS2-linked binary: install [MSYS2](https://www.msys2.org/), and open the "MSYS2 MSYS" shell. From there, install `gcc` (run `pacman -Sy gcc`), navigate to this project's directory and run `./build.sh`. 
   - To compile and run a Linux binary from Windows: install WSL, and from there install `gcc` and run `./build.sh` in this project's directory.
 - To target an ESP variant, set up a PlatformIO project (select the ESP-IDF framework, **not Arduino**) and clone this repository on top of it. See **Configuration** below for further steps. For better performance, consider changing the clock speed and enabling compiler optimizations. If you don't know how to do this, there are plenty of resources online.
+- For **cross-compilation to OpenBSD/macppc** (or any target), the build script respects `CC`, `CFLAGS`, and `LDFLAGS` environment variables. Example:
+  ```bash
+  SYSROOT=/path/to/openbsd-macppc-sysroot
+  CC="clang --target=powerpc-unknown-openbsd --sysroot=$SYSROOT -B$SYSROOT/usr/lib" \
+  CFLAGS="-O2 -Iinclude -nostdlibinc -isystem $SYSROOT/usr/include" \
+  LDFLAGS="-fuse-ld=lld -L$SYSROOT/usr/lib -nostartfiles $SYSROOT/usr/lib/crt0.o \
+           $SYSROOT/usr/lib/crtbegin.o -lc -lcompiler_rt $SYSROOT/usr/lib/crtend.o -static" \
+  ./build.sh
+  ```
+  The required sysroot can be obtained by extracting OpenBSD/macppc `baseXX.tgz` and `compXX.tgz` from any [OpenBSD mirror](https://cdn.openbsd.org/pub/OpenBSD/).
 
 ## Configuration
 Configuring the server requires compiling it from its source code as described in the section above.

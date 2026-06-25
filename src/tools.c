@@ -100,11 +100,7 @@ ssize_t send_all (int client_fd, const void *buf, ssize_t len) {
 
   // Busy-wait (with task yielding) until all data has been sent
   while (sent < len) {
-    #ifdef _WIN32
-      ssize_t n = send(client_fd, p + sent, len - sent, 0);
-    #else
-      ssize_t n = send(client_fd, p + sent, len - sent, MSG_NOSIGNAL);
-    #endif
+    ssize_t n = send(client_fd, p + sent, len - sent, 0);
     if (n > 0) { // some data was sent, log it
       sent += n;
       last_update_time = get_program_time();
