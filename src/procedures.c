@@ -7,6 +7,7 @@
 #endif
 
 #include "globals.h"
+#include "config.h"
 #include "tools.h"
 #include "varnum.h"
 #include "packets.h"
@@ -361,7 +362,7 @@ void spawnPlayer (PlayerData *player) {
   sc_updateTime(player->client_fd, world_time);
 
   #ifdef ENABLE_PLAYER_FLIGHT
-  if (GAMEMODE != 1 && GAMEMODE != 3) {
+  if (config.gamemode != 1 && config.gamemode != 3) {
     // Give the player flight (for testing)
     sc_playerAbilities(player->client_fd, 0x04);
   }
@@ -379,8 +380,8 @@ void spawnPlayer (PlayerData *player) {
 
   // Send spawn chunk first
   sc_chunkDataAndUpdateLight(player->client_fd, _x, _z);
-  for (int i = -VIEW_DISTANCE; i <= VIEW_DISTANCE; i ++) {
-    for (int j = -VIEW_DISTANCE; j <= VIEW_DISTANCE; j ++) {
+  for (int i = -config.view_distance; i <= config.view_distance; i ++) {
+    for (int j = -config.view_distance; j <= config.view_distance; j ++) {
       if (i == 0 && j == 0) continue;
       sc_chunkDataAndUpdateLight(player->client_fd, _x + i, _z + j);
     }
@@ -1178,7 +1179,7 @@ void handlePlayerAction (PlayerData *player, int action, short x, short y, short
 
   // In creative, only the "start mining" action is sent
   // No additional verification is performed, the block is simply removed
-  if (action == 0 && GAMEMODE == 1) {
+  if (action == 0 && config.gamemode == 1) {
     makeBlockChange(x, y, z, 0);
     return;
   }
@@ -1778,7 +1779,7 @@ void handleServerTick (int64_t time_since_last_tick) {
     }
 
     // Despawn mobs past a certain distance from nearest player
-    if (closest_dist > MOB_DESPAWN_DISTANCE) {
+    if (closest_dist > config.mob_despawn_distance) {
       mob_data[i].type = 0;
       continue;
     }

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "globals.h"
+#include "config.h"
 #include "tools.h"
 #include "registries.h"
 #include "procedures.h"
@@ -53,7 +54,7 @@ uint8_t getCornerHeight (uint32_t hash, uint8_t biome) {
   // When calculating the height, parts of the hash are used as random values.
   // Often, multiple values are stacked to stabilize the distribution while
   // allowing for occasionally larger variances.
-  uint8_t height = TERRAIN_BASE_HEIGHT;
+  uint8_t height = config.terrain_base_height;
 
   switch (biome) {
 
@@ -264,8 +265,8 @@ uint8_t getTerrainAtFromCache (int x, int y, int z, int rx, int rz, ChunkAnchor 
   // Starting at 4 blocks below terrain level, generate minerals and caves
   if (y <= height - 4) {
     // Caves use the same shape as surface terrain, just mirrored
-    int8_t gap = height - TERRAIN_BASE_HEIGHT;
-    if (y < CAVE_BASE_DEPTH + gap && y > CAVE_BASE_DEPTH - gap) return B_air;
+    int8_t gap = height - config.terrain_base_height;
+    if (y < config.cave_base_depth + gap && y > config.cave_base_depth - gap) return B_air;
 
     // The chunk-relative X and Z coordinates are used as the seed for an
     // xorshift RNG/hash function to generate the Y coordinate of the ore

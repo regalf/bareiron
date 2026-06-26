@@ -22,6 +22,7 @@
 #endif
 
 #include "globals.h"
+#include "config.h"
 #include "varnum.h"
 #include "procedures.h"
 #include "tools.h"
@@ -66,7 +67,7 @@ ssize_t recv_all (int client_fd, void *buf, size_t n, uint8_t require_first) {
     if (r < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
         // handle network timeout
-        if (get_program_time() - last_update_time > NETWORK_TIMEOUT_TIME) {
+        if (get_program_time() - last_update_time > config.network_timeout_time) {
           disconnectClient(&client_fd, -1);
           return -1;
         }
@@ -118,7 +119,7 @@ ssize_t send_all (int client_fd, const void *buf, ssize_t len) {
     if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK) {
     #endif
       // handle network timeout
-      if (get_program_time() - last_update_time > NETWORK_TIMEOUT_TIME) {
+      if (get_program_time() - last_update_time > config.network_timeout_time) {
         disconnectClient(&client_fd, -2);
         return -1;
       }

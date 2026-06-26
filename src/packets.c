@@ -16,6 +16,7 @@
 #endif
 
 #include "globals.h"
+#include "config.h"
 #include "tools.h"
 #include "varnum.h"
 #include "registries.h"
@@ -189,7 +190,7 @@ int sc_finishConfiguration (int client_fd) {
 // S->C Login (play)
 int sc_loginPlay (int client_fd) {
 
-  writeVarInt(client_fd, 47 + sizeVarInt(MAX_PLAYERS) + sizeVarInt(VIEW_DISTANCE) * 2);
+  writeVarInt(client_fd, 47 + sizeVarInt(MAX_PLAYERS) + sizeVarInt(config.view_distance) * 2);
   writeByte(client_fd, 0x2B);
   // entity id
   writeUint32(client_fd, client_fd);
@@ -203,9 +204,9 @@ int sc_loginPlay (int client_fd) {
   // maxplayers
   writeVarInt(client_fd, MAX_PLAYERS);
   // view distance
-  writeVarInt(client_fd, VIEW_DISTANCE);
+  writeVarInt(client_fd, config.view_distance);
   // sim distance
-  writeVarInt(client_fd, VIEW_DISTANCE);
+  writeVarInt(client_fd, config.view_distance);
   // reduced debug info
   writeByte(client_fd, 0);
   // respawn screen
@@ -221,7 +222,7 @@ int sc_loginPlay (int client_fd) {
   // hashed seed
   writeUint64(client_fd, 0x0123456789ABCDEF);
   // gamemode
-  writeByte(client_fd, GAMEMODE);
+  writeByte(client_fd, config.gamemode);
   // previous gamemode
   writeByte(client_fd, 0xFF);
   // is debug
@@ -1065,7 +1066,7 @@ int sc_respawn (int client_fd) {
   // hashed seed
   writeUint64(client_fd, 0x0123456789ABCDEF);
   // gamemode
-  writeByte(client_fd, GAMEMODE);
+  writeByte(client_fd, config.gamemode);
   // previous gamemode
   writeByte(client_fd, 0xFF);
   // is debug

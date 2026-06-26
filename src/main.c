@@ -33,6 +33,7 @@
 #endif
 
 #include "globals.h"
+#include "config.h"
 #include "tools.h"
 #include "varnum.h"
 #include "packets.h"
@@ -226,7 +227,7 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
         // Handle fall damage
         if (on_ground) {
           int16_t damage = player->grounded_y - player->y - 3;
-          if (damage > 0 && (GAMEMODE == 0 || GAMEMODE == 2) && !swimming) {
+          if (damage > 0 && (config.gamemode == 0 || config.gamemode == 2) && !swimming) {
             hurtEntity(client_fd, -1, D_fall, damage);
           }
           player->grounded_y = player->y;
@@ -356,8 +357,8 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
         if ((r & 3) == 0) {
           // The mob is placed in the middle of the new chunk row,
           // at a random position within the chunk
-          short mob_x = (_x + dx * VIEW_DISTANCE) * 16 + ((r >> 4) & 15);
-          short mob_z = (_z + dz * VIEW_DISTANCE) * 16 + ((r >> 8) & 15);
+          short mob_x = (_x + dx * config.view_distance) * 16 + ((r >> 4) & 15);
+          short mob_z = (_z + dz * config.view_distance) * 16 + ((r >> 8) & 15);
           // Start at the Y coordinate of the spawning player and move upward
           // until a valid space is found
           uint8_t mob_y = cy - 8;
@@ -400,21 +401,21 @@ void handlePacket (int client_fd, int length, int packet_id, int state) {
         sc_setCenterChunk(client_fd, _x, _z);
 
         while (dx != 0) {
-          sc_chunkDataAndUpdateLight(client_fd, _x + dx * VIEW_DISTANCE, _z);
+          sc_chunkDataAndUpdateLight(client_fd, _x + dx * config.view_distance, _z);
           count ++;
-          for (int i = 1; i <= VIEW_DISTANCE; i ++) {
-            sc_chunkDataAndUpdateLight(client_fd, _x + dx * VIEW_DISTANCE, _z - i);
-            sc_chunkDataAndUpdateLight(client_fd, _x + dx * VIEW_DISTANCE, _z + i);
+          for (int i = 1; i <= config.view_distance; i ++) {
+            sc_chunkDataAndUpdateLight(client_fd, _x + dx * config.view_distance, _z - i);
+            sc_chunkDataAndUpdateLight(client_fd, _x + dx * config.view_distance, _z + i);
             count += 2;
           }
           dx += dx > 0 ? -1 : 1;
         }
         while (dz != 0) {
-          sc_chunkDataAndUpdateLight(client_fd, _x, _z + dz * VIEW_DISTANCE);
+          sc_chunkDataAndUpdateLight(client_fd, _x, _z + dz * config.view_distance);
           count ++;
-          for (int i = 1; i <= VIEW_DISTANCE; i ++) {
-            sc_chunkDataAndUpdateLight(client_fd, _x - i, _z + dz * VIEW_DISTANCE);
-            sc_chunkDataAndUpdateLight(client_fd, _x + i, _z + dz * VIEW_DISTANCE);
+          for (int i = 1; i <= config.view_distance; i ++) {
+            sc_chunkDataAndUpdateLight(client_fd, _x - i, _z + dz * config.view_distance);
+            sc_chunkDataAndUpdateLight(client_fd, _x + i, _z + dz * config.view_distance);
             count += 2;
           }
           dz += dz > 0 ? -1 : 1;
@@ -512,6 +513,21 @@ int main () {
     setbuf(stdout, NULL);
   #endif
 
+  // Load config (creates server.conf on first run)
+  config_load("server.conf");
+
+  // Override globals from config
+  world_seed = config.world_seed;
+  rng_seed = config.rng_seed;
+  motd_len = strlen(config.motd);
+  memcpy(motd, config.motd, motd_len);
+  motd[motd_len] = '\0';
+  #ifdef SEND_BRAND
+  brand_len = strlen(config.brand);
+  memcpy(brand, config.brand, brand_len);
+  brand[brand_len] = '\0';
+  #endif
+
   // Hash the seeds to ensure they're random enough
   world_seed = splitmix64(world_seed);
   printf("World seed (hashed): ");
@@ -561,7 +577,7 @@ int main () {
   // Bind socket to IP/port
   server_addr.sin_family = AF_INET;
   server_addr.sin_addr.s_addr = INADDR_ANY;
-  server_addr.sin_port = htons(PORT);
+  server_addr.sin_port = htons(config.port);
 
   if (bind(server_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
     perror("bind failed");
@@ -575,7 +591,7 @@ int main () {
     close(server_fd);
     exit(EXIT_FAILURE);
   }
-  printf("Server listening on port %d...\n", PORT);
+  printf("Server listening on port %d...\n", config.port);
 
   // Make the socket non-blocking
   // This is necessary to not starve the idle task during slow connections
@@ -628,7 +644,7 @@ int main () {
 
     // Handle periodic events (server ticks)
     int64_t time_since_last_tick = get_program_time() - last_tick_time;
-    if (time_since_last_tick > TIME_BETWEEN_TICKS) {
+    if (time_since_last_tick > config.time_between_ticks) {
       handleServerTick(time_since_last_tick);
       last_tick_time = get_program_time();
     }

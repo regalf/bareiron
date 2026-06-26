@@ -1,4 +1,5 @@
 #include "globals.h"
+#include "config.h"
 
 #ifdef SYNC_WORLD_TO_DISK
 
@@ -174,7 +175,7 @@ void writePlayerDataToDisk () {
 void writeDataToDiskOnInterval () {
 
   // Skip this write if enough time hasn't passed since the last one
-  if (get_program_time() - last_disk_sync_time < DISK_SYNC_INTERVAL) return;
+  if (get_program_time() - last_disk_sync_time < config.disk_sync_interval) return;
   last_disk_sync_time = get_program_time();
 
   // Write full player data and block changes buffers
